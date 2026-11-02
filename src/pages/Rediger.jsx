@@ -312,14 +312,23 @@ function Edit({ drafts, setDrafts }) {
 function HistoryView({ history, folders, activeFolder, onEdit }) {
   const { t, notify } = useStore();
   const [readingArticle, setReadingArticle] = useState(null);
+  const [copied, setCopied] = useState(false);
   const folder = folders.find((f) => f.id === activeFolder);
   const list = activeFolder ? history.filter((h) => h.theme === activeFolder) : history;
 
-  const handleExportPDF = (article) => {
-    notify('Préparation de l’export PDF...');
+  const handleExportPDF = () => {
+    notify('Préparation du document pour impression / PDF...');
     setTimeout(() => {
       window.print();
-    }, 500);
+    }, 400);
+  };
+
+  const handleCopyText = (article) => {
+    const textToCopy = `${article.title}\n\n${article.content || "Contenu de démonstration de l'article certifié par Cheky IA."}`;
+    navigator.clipboard.writeText(textToCopy);
+    setCopied(true);
+    notify('Article copié dans le presse-papier !');
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -338,12 +347,10 @@ function HistoryView({ history, folders, activeFolder, onEdit }) {
                 {h.when} · Certifié par l'IA
               </p>
             </div>
+            {/* Uniquement le bouton "Lire" dans la liste */}
             <div className="flex items-center gap-2">
-              <button className="btn-ghost !px-3 !py-2.5" onClick={() => setReadingArticle(h)} title="Lire">
+              <button className="btn-ghost !px-4 !py-2.5" onClick={() => setReadingArticle(h)} title="Lire">
                 <Eye className="h-4 w-4" /> <span className="hidden sm:inline">Lire</span>
-              </button>
-              <button className="btn-ghost !px-3 !py-2.5" onClick={onEdit} title="Modifier">
-                <PenLine className="h-4 w-4" /> <span className="hidden sm:inline">{t('edit')}</span>
               </button>
             </div>
           </article>
@@ -354,16 +361,32 @@ function HistoryView({ history, folders, activeFolder, onEdit }) {
       {/* Modal de lecture style Papier / Manuscrit */}
       {readingArticle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md">
-          <div className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[2rem] bg-[#fdfbf7] p-8 shadow-2xl border border-[#e6dec5] text-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100">
+          <div className="relative max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-[2rem] bg-[#fdfbf7] p-8 shadow-2xl border border-[#e6dec5] text-slate-800 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-100 print:absolute print:inset-0 print:max-h-none print:w-full print:border-none print:shadow-none print:bg-white">
             
-            {/* Boutons d'action haut */}
-            <div className="flex items-center justify-between pb-4 border-b border-amber-900/10 dark:border-slate-800">
+            {/* Boutons d'action haut (Masqués à l'impression PDF) */}
+            <div className="flex items-center justify-between pb-4 border-b border-amber-900/10 dark:border-slate-800 print:hidden">
               <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
                 {readingArticle.themeLabel}
               </span>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => handleExportPDF(readingArticle)}
+                  onClick={() => {
+                    const articleToEdit = readingArticle;
+                    setReadingArticle(null);
+                    onEdit(articleToEdit);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 hover:bg-sky-100 dark:bg-sky-900/30 dark:text-sky-300"
+                >
+                  <PenLine className="h-4 w-4" /> Modifier
+                </button>
+                <button
+                  onClick={() => handleCopyText(readingArticle)}
+                  className="inline-flex items-center gap-1.5 rounded-xl bg-amber-50 px-3 py-2 text-xs font-bold text-amber-800 hover:bg-amber-100 dark:bg-amber-900/20 dark:text-amber-300"
+                >
+                  {copied ? 'Copié !' : 'Copier'}
+                </button>
+                <button
+                  onClick={() => handleExportPDF()}
                   className="inline-flex items-center gap-1.5 rounded-xl bg-brand-50 px-3.5 py-2 text-xs font-bold text-brand-700 hover:bg-brand-100 dark:bg-brand-900/30 dark:text-brand-300"
                 >
                   <Download className="h-4 w-4" /> Exporter PDF
@@ -387,6 +410,8 @@ function HistoryView({ history, folders, activeFolder, onEdit }) {
                 <span>{readingArticle.when}</span>
                 <span>•</span>
                 <span className="text-emerald-600 font-bold">Certifié par l'IA Cheky</span>
+                <span>•</span>
+                <span>~ 1 min de lecture</span>
               </div>
               <hr className="border-dashed border-amber-900/20 dark:border-slate-700 my-4" />
               <div className="text-base leading-relaxed space-y-4 text-slate-700 dark:text-slate-300">
@@ -399,8 +424,8 @@ function HistoryView({ history, folders, activeFolder, onEdit }) {
               </div>
             </div>
 
-            {/* Pied de modal */}
-            <div className="mt-8 flex justify-end pt-4 border-t border-amber-900/10 dark:border-slate-800">
+            {/* Pied de modal (Masqué à l'impression PDF) */}
+            <div className="mt-8 flex justify-end pt-4 border-t border-amber-900/10 dark:border-slate-800 print:hidden">
               <button onClick={() => setReadingArticle(null)} className="btn-primary !px-6 !py-2.5">
                 Fermer la lecture
               </button>
@@ -420,7 +445,6 @@ export default function Rediger() {
   const [activeFolder, setActiveFolder] = useState(null);
   const [messages, setMessages] = useState([{ from: 'ai', text: t('aiHello') }]);
   
-  // État pour ouvrir/fermer le menu Burger mobile
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const addDraft = (d) => {
@@ -498,7 +522,22 @@ export default function Rediger() {
 
         {view === 'create' && <Create messages={messages} setMessages={setMessages} addDraft={addDraft} />}
         {view === 'edit' && <Edit drafts={drafts} setDrafts={setDrafts} />}
-        {view === 'history' && <HistoryView history={initialHistory} folders={folders} activeFolder={activeFolder} onEdit={() => setView('edit')} />}
+        {view === 'history' && (
+          <HistoryView 
+            history={initialHistory} 
+            folders={folders} 
+            activeFolder={activeFolder} 
+            onEdit={(article) => {
+              if (article) {
+                setDrafts(prev => [
+                  { id: article.id, title: article.title, lead: article.themeLabel || '', body: article.content || '', score: 95, sources: 3 },
+                  ...prev
+                ]);
+              }
+              setView('edit');
+            }} 
+          />
+        )}
       </main>
     </div>
   );
