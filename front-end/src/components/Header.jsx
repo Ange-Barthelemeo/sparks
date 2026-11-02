@@ -11,20 +11,30 @@ const tabs = [
 
 export function LangSelect() {
   const { lang, setLang } = useStore();
+  
   return (
-    <label className="chip relative !gap-1 !pr-8">
-      <span className="sr-only">Langue</span>
+    <div className="relative inline-flex items-center">
       <select
         value={lang}
         onChange={(e) => setLang(e.target.value)}
-        className="cursor-pointer appearance-none bg-transparent pr-1 font-bold uppercase focus:outline-none"
+        className="peer cursor-pointer appearance-none rounded-xl bg-slate-100/80 dark:bg-slate-900/80 hover:bg-slate-200/80 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-800 px-3 py-2 pr-8 text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500"
       >
-        <option value="mg">MG</option>
-        <option value="fr">FR</option>
-        <option value="en">EN</option>
+        <option value="mg" className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 font-medium py-1">
+          MG
+        </option>
+        <option value="fr" className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 font-medium py-1">
+          FR
+        </option>
+        <option value="en" className="bg-white text-slate-900 dark:bg-slate-900 dark:text-slate-100 font-medium py-1">
+          EN
+        </option>
       </select>
-      <ChevronDown className="pointer-events-none absolute right-2 h-4 w-4" />
-    </label>
+      
+      {/* Icône de flèche avec effet de transition dynamique au focus */}
+      <div className="pointer-events-none absolute right-2.5 flex items-center text-slate-400 dark:text-slate-500 transition-transform duration-200 peer-focus:rotate-180 peer-focus:text-brand-500">
+        <ChevronDown className="h-3.5 w-3.5" />
+      </div>
+    </div>
   );
 }
 
