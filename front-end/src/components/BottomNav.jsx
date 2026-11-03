@@ -1,13 +1,10 @@
-import { BarChart3, Bookmark, Home, PenLine, Phone } from 'lucide-react';
+import { BarChart3, Home, Phone } from 'lucide-react';
 import { useStore } from '../store.jsx';
 
-// Navigation mobile (le menu « Dossiers » a été retiré : il vit dans Rédiger)
 const items = [
   { id: 'actualites', key: 'home', Icon: Home },
   { id: 'statistiques', key: 'reports', Icon: BarChart3 },
-  { id: 'rediger', key: 'write', Icon: PenLine },
-  { id: 'contacts', key: 'contacts', Icon: Phone },
-  { id: 'signets', key: 'saved', Icon: Bookmark }
+  { id: 'contacts', key: 'contacts', Icon: Phone }
 ];
 
 export default function BottomNav() {
@@ -17,7 +14,7 @@ export default function BottomNav() {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95 lg:hidden"
       aria-label="Navigation mobile"
     >
-      <ul className="mx-auto grid max-w-lg grid-cols-5">
+      <ul className="mx-auto grid max-w-lg grid-cols-3">
         {items.map(({ id, key, Icon }) => {
           const active = route === id;
           return (

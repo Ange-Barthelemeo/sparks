@@ -5,8 +5,7 @@ import { Logo } from './ui.jsx';
 const tabs = [
   { id: 'actualites', key: 'news' },
   { id: 'statistiques', key: 'stats' },
-  { id: 'contacts', key: 'contacts' },
-  { id: 'rediger', key: 'write' }
+  { id: 'contacts', key: 'contacts' }
 ];
 
 export function LangSelect() {
